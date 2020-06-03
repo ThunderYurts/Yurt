@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = ".;ysync";
+package ysync;
+
+service LogSync {
+    rpc Sync(stream SyncRequest) returns (stream SyncReply) {}
+}
+
+enum SyncCode {
+    SYNC_SUCCESS = 0;
+    SYNC_ERROR = 1;
+}
+
+message SyncRequest {
+    string Name = 1;
+    int32 Index = 2;
+}
+
+message SyncReply {
+    SyncCode Code = 1;
+    repeated string Logs = 2;
+    int32 LastIndex = 3;
+}

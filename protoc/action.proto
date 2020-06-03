@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = ".;action";
+package action;
+
+service Action {
+    rpc Read(ReadRequest) returns (ReadReply) {}
+    rpc Put(PutRequest) returns (PutReply) {}
+    rpc Delete(DeleteRequest) returns (DeleteReply) {}
+}
+
+enum ReadCode {
+    READ_SUCCESS = 0;
+    READ_ERROR = 1;
+    READ_NOT_FOUND = 2;
+}
+
+enum PutCode {
+    PUT_SUCCESS = 0;
+    PUT_ERROR = 1;
+    PUT_LOCK = 2;
+}
+
+enum DeleteCode {
+    DELETE_SUCCESS = 0;
+    DELETE_ERROR = 1;
+    DELETE_LOCK = 2;
+}
+
+message ReadRequest {
+    string Key = 1;
+}
+
+message ReadReply {
+    ReadCode Code = 1;
+    string Value = 2;
+}
+
+message PutRequest {
+    string Key = 1;
+    string Value = 2;
+}
+
+message PutReply {
+    PutCode Code = 2;
+}
+
+message DeleteRequest {
+    string Key = 1;
+}
+
+message DeleteReply {
+    DeleteCode Code = 1;
+}
