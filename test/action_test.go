@@ -139,7 +139,7 @@ func testPrimarySecondaryInit(t *testing.T) {
 		primaryRootContext, primaryFinalizeFunc := context.WithCancel(context.Background())
 		primaryLogName := "./primary.log"
 		os.Truncate(primaryLogName, 0)
-		primary, err := yurt.NewYurt(primaryRootContext, primaryFinalizeFunc, primaryLogName, false, yconst.PRIMARY)
+		primary, err := yurt.NewYurt(primaryRootContext, primaryFinalizeFunc, "primary", primaryLogName, false, yconst.PRIMARY)
 		So(err, ShouldBeNil)
 		err = primary.Start(":50001", ":50002")
 		So(err, ShouldBeNil)
@@ -157,7 +157,7 @@ func testPrimarySecondaryInit(t *testing.T) {
 		secondaryRootContext, secondaryFinalizeFunc := context.WithCancel(context.Background())
 		secondaryLogName := "./secondary.log"
 		os.Truncate(secondaryLogName, 0)
-		secondary, err := yurt.NewYurt(secondaryRootContext, secondaryFinalizeFunc, secondaryLogName, false, yconst.SECONDARY, ":50001")
+		secondary, err := yurt.NewYurt(secondaryRootContext, secondaryFinalizeFunc, "secondary", secondaryLogName, false, yconst.SECONDARY, ":50001")
 		So(err, ShouldBeNil)
 		err = secondary.Start(":50003", ":50004")
 		So(err, ShouldBeNil)
@@ -190,7 +190,7 @@ func testPrimarySecondaryInit(t *testing.T) {
 func setup() (*yurt.Yurt, error) {
 	rootContext, finalizeFunc := context.WithCancel(context.Background())
 	os.Truncate(logName, 0)
-	yurt, err := yurt.NewYurt(rootContext, finalizeFunc, logName, false, yconst.PRIMARY)
+	yurt, err := yurt.NewYurt(rootContext, finalizeFunc, "primary", logName, false, yconst.PRIMARY)
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err

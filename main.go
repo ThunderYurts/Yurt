@@ -32,7 +32,8 @@ func main() {
 		return
 	}
 	rootContext, finalizeFunc := context.WithCancel(context.Background())
-	yurt, err := yurt.NewYurt(rootContext, finalizeFunc, logName, false, yconst.PRIMARY)
+	
+	yurt, err := yurt.NewYurt(rootContext, finalizeFunc, "primary", logName, false, yconst.PRIMARY)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

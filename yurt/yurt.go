@@ -17,7 +17,8 @@ import (
 type Config struct {
 	actionServerConfig *action.ServerConfig
 	syncServerConfig   *ysync.ServerConfig
-	LogName            string
+	logName            string
+	name               string
 }
 
 // Yurt is now here!
@@ -33,7 +34,7 @@ type Yurt struct {
 }
 
 // NewYurt is a help function to Init Yurt
-func NewYurt(ctx context.Context, finalizeFunc context.CancelFunc, logName string, locked bool, stage string, ops ...string) (Yurt, error) {
+func NewYurt(ctx context.Context, finalizeFunc context.CancelFunc, name string, logName string, locked bool, stage string, ops ...string) (Yurt, error) {
 	l, err := log.NewLogInline(logName)
 	if err != nil {
 		return Yurt{}, err
@@ -53,7 +54,7 @@ func NewYurt(ctx context.Context, finalizeFunc context.CancelFunc, logName strin
 		wg:            sync.WaitGroup{},
 		fianalizeFunc: finalizeFunc,
 		storage:       &storage,
-		config:        Config{actionServerConfig: actionServerConfig, syncServerConfig: syncServerConfig, LogName: logName},
+		config:        Config{actionServerConfig: actionServerConfig, syncServerConfig: syncServerConfig, logName: logName, name: name},
 	}, nil
 }
 
@@ -76,7 +77,7 @@ func (yurt *Yurt) Start(syncPort string, actionPort string) error {
 		go func(wg *sync.WaitGroup) {
 			defer wg.Done()
 			fmt.Println("secondary starts sync routine")
-			l, err := log.NewLogInline(yurt.config.LogName)
+			l, err := log.NewLogInline(yurt.config.logName)
 			if err != nil {
 				return
 			}
@@ -98,7 +99,7 @@ func (yurt *Yurt) Start(syncPort string, actionPort string) error {
 				default:
 					{
 						// TODO use yurt name
-						err = stream.Send(&ysync.SyncRequest{Name: "slave", Index: index})
+						err = stream.Send(&ysync.SyncRequest{Name: yurt.config.name, Index: index})
 						res, err := stream.Recv()
 						if err != nil {
 							fmt.Println(err.Error())
