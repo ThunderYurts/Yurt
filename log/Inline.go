@@ -22,7 +22,28 @@ type Inline struct {
 
 // NewLogInline is an help function
 func NewLogInline(filename string) (Inline, error) {
-	f, err := os.Create(filename)
+	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil && os.IsNotExist(err) {
+		f, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	}
+	if err != nil {
+		return Inline{}, err
+	}
+
+	return Inline{
+		filename: filename,
+		count:    0,
+		index:    0,
+		f:        f,
+	}, nil
+}
+
+// NewLogInlineWithoutCreate is an help function
+func NewLogInlineWithoutCreate(filename string) (Inline, error) {
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0666)
+	if err != nil && os.IsNotExist(err) {
+		return Inline{}, errors.New(filename + " not found")
+	}
 	if err != nil {
 		return Inline{}, err
 	}
@@ -40,9 +61,18 @@ func (log *Inline) Delete(key string) error {
 	log.Lock()
 	defer log.Unlock()
 	writer := bufio.NewWriter(log.f)
-	defer writer.Flush()
 	commit := "D " + key + " " + strconv.Itoa(int(log.count)) + " \n"
+	log.count = log.count + 1
+	fmt.Println(commit)
 	_, err := writer.WriteString(commit)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	err = writer.Flush()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	return err
 }
 
@@ -51,9 +81,14 @@ func (log *Inline) Put(key string, value string) error {
 	log.Lock()
 	defer log.Unlock()
 	writer := bufio.NewWriter(log.f)
-	defer writer.Flush()
 	commit := "P " + key + " " + value + " " + strconv.Itoa(int(log.count)) + " \n"
+	fmt.Println(commit)
+	log.count = log.count + 1
 	_, err := writer.WriteString(commit)
+	err = writer.Flush()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	return err
 }
 
@@ -62,15 +97,16 @@ func (log *Inline) ImportLog(logs []string) error {
 	log.Lock()
 	defer log.Unlock()
 	writer := bufio.NewWriter(log.f)
-	defer writer.Flush()
 	for _, val := range logs {
 		_, err := writer.WriteString(val + "\n")
 		if err != nil {
 			// TODO need rollback
 			return err
 		}
+		fmt.Printf("sedcondary write %s\n", val)
 	}
-	return nil
+	err := writer.Flush()
+	return err
 
 }
 
@@ -84,29 +120,35 @@ func (log *Inline) LoadLog(index int32) ([]string, int32, error) {
 	max := 0
 	for {
 		line, err := reader.ReadString('\n')
-		line = strings.TrimSpace(line)
-		lines = append(lines, line)
-		max = max + 1
-		if max == 10 {
-			break
-		}
 		if err != nil {
 			if err == io.EOF {
-				fmt.Println("File read ok!")
+				// fmt.Println("File read buttom!")
 				break
 			} else {
 				fmt.Println("Read file error!", err)
 				return nil, 0, err
 			}
 		}
+		line = strings.TrimSpace(line)
+		if line == "" {
+			break
+		}
+		lines = append(lines, line)
+		max = max + 1
+		if max == 10 {
+			break
+		}
 	}
-
-	lastLogSplit := strings.Fields(lines[len(lines)-1])
-	newIndex, err := strconv.ParseInt(lastLogSplit[len(lastLogSplit)-1], 10, 32)
-	if err != nil {
-		return nil, 0, err
+	if len(lines) > 0 {
+		lastLogSplit := strings.Fields(lines[len(lines)-1])
+		newIndex, err := strconv.ParseInt(lastLogSplit[len(lastLogSplit)-1], 10, 32)
+		if err != nil {
+			return nil, 0, err
+		}
+		log.index = int32(newIndex)
+		return lines, int32(newIndex), nil
 	}
-	return lines, int32(newIndex), nil
+	return lines, index, nil
 }
 
 // Destruct fd

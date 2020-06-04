@@ -48,7 +48,7 @@ func (m *Memory) Read(key string) (string, error) {
 }
 
 // LoadLog will LoadLog from string and do it to sync data from Primary
-func (m *Memory) LoadLog(logs []string) (int32, error) {
+func (m *Memory) LoadLog(logs []string) error {
 	m.Lock()
 	defer m.Unlock()
 	/*  The log is format like this
@@ -64,11 +64,11 @@ func (m *Memory) LoadLog(logs []string) (int32, error) {
 				// Delete action
 				split := strings.Fields(log)
 				if len(split) != 3 {
-					return 0, errors.New("log invalid delete")
+					return errors.New("log invalid delete")
 				}
 				_, err := strconv.ParseInt(split[len(split)-1], 10, 32)
 				if err != nil {
-					return 0, err
+					return err
 				}
 
 			}
@@ -77,16 +77,16 @@ func (m *Memory) LoadLog(logs []string) (int32, error) {
 				// Put Action
 				split := strings.Fields(log)
 				if len(split) != 4 {
-					return 0, errors.New("log invalid put")
+					return errors.New("log invalid put")
 				}
 				_, err := strconv.ParseInt(split[len(split)-1], 10, 32)
 				if err != nil {
-					return 0, err
+					return err
 				}
 			}
 		default:
 			{
-				return 0, errors.New("log invalid action")
+				return errors.New("log invalid action")
 			}
 		}
 	}
@@ -108,12 +108,6 @@ func (m *Memory) LoadLog(logs []string) (int32, error) {
 			}
 		}
 	}
-	last := logs[len(logs)-1]
-	lastSplit := strings.Fields(last)
-	// get last index
-	va, err := strconv.ParseInt(lastSplit[len(lastSplit)-1], 10, 32)
-	if err != nil {
-		return 0, errors.New("log invalid index")
-	}
-	return int32(va), nil
+
+	return nil
 }

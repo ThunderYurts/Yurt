@@ -8,26 +8,32 @@ import (
 
 	"github.com/ThunderYurts/Yurt/log"
 	"github.com/ThunderYurts/Yurt/storage"
+	"github.com/ThunderYurts/Yurt/yconst"
 	grpc "google.golang.org/grpc"
 )
 
+// ServerConfig get config from yurt
+type ServerConfig struct {
+	Stage  string
+	Locked bool
+	
+}
+
 // Server for handling rpc request
 type Server struct {
-	storage    storage.Storage
-	log        log.Log
-	locked     bool
-	lockedChan <-chan bool
-	ctx        context.Context
+	storage storage.Storage
+	log     log.Log
+	ctx     context.Context
+	config  *ServerConfig
 }
 
 // NewServer is a help function
-func NewServer(ctx context.Context, storage storage.Storage, log log.Log, locked bool, lockedChan <-chan bool) Server {
+func NewServer(ctx context.Context, storage storage.Storage, log log.Log, config *ServerConfig) Server {
 	return Server{
-		storage:    storage,
-		log:        log,
-		locked:     locked,
-		lockedChan: lockedChan,
-		ctx:        ctx,
+		storage: storage,
+		log:     log,
+		ctx:     ctx,
+		config:  config,
 	}
 }
 
@@ -35,15 +41,21 @@ func NewServer(ctx context.Context, storage storage.Storage, log log.Log, locked
 func (s *Server) Read(ctx context.Context, in *ReadRequest) (*ReadReply, error) {
 	value, err := s.storage.Read(in.Key)
 	if err != nil {
+		if err.Error() == "NOT_FOUND" {
+			return &ReadReply{Code: ReadCode_READ_NOT_FOUND, Value: value}, nil
+		}
 		return nil, err
 	}
-	return &ReadReply{Value: value}, nil
+	return &ReadReply{Code: ReadCode_READ_SUCCESS, Value: value}, nil
 }
 
 // Put put key value pair into storage
 func (s *Server) Put(ctx context.Context, in *PutRequest) (*PutReply, error) {
 	// TODO check Lock first
-	if s.locked {
+	if s.config.Stage == yconst.SECONDARY {
+		return &PutReply{Code: PutCode_PUT_ERROR}, nil
+	}
+	if s.config.Locked {
 		return &PutReply{Code: PutCode_PUT_LOCK}, nil
 	}
 	err := s.log.Put(in.Key, in.Value)
@@ -64,7 +76,10 @@ func (s *Server) Put(ctx context.Context, in *PutRequest) (*PutReply, error) {
 // Delete put key value pair into storage
 func (s *Server) Delete(ctx context.Context, in *DeleteRequest) (*DeleteReply, error) {
 	// TODO check Lock first
-	if s.locked {
+	if s.config.Stage == yconst.SECONDARY {
+		return &DeleteReply{Code: DeleteCode_DELETE_ERROR}, nil
+	}
+	if s.config.Locked {
 		return &DeleteReply{Code: DeleteCode_DELETE_LOCK}, nil
 	}
 	err := s.log.Delete(in.Key)

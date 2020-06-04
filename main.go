@@ -4,65 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"time"
+	"os"
+	"os/signal"
 
-	"sync"
-
-	"github.com/ThunderYurts/Yurt/action"
-	"github.com/ThunderYurts/Yurt/log"
-	"github.com/ThunderYurts/Yurt/storage"
-	"github.com/ThunderYurts/Yurt/ysync"
+	"github.com/ThunderYurts/Yurt/yconst"
+	"github.com/ThunderYurts/Yurt/yurt"
 )
-
-// Yurt is now here!
-type Yurt struct {
-	syncServer    ysync.Server
-	actionServer  action.Server
-	syncClient    ysync.LogSyncClient
-	ctx           context.Context
-	wg            sync.WaitGroup
-	fianalizeFunc context.CancelFunc
-	// config
-}
-
-// NewYurt is a help function to Init Yurt
-func NewYurt(ctx context.Context, finalizeFunc context.CancelFunc, logName string, locked bool, lockecChan <-chan bool) (Yurt, error) {
-	// TODO syncClient
-	l, err := log.NewLogInline(logName)
-	if err != nil {
-		return Yurt{}, err
-	}
-	storage := storage.NewMemory()
-	return Yurt{
-		syncServer:    ysync.NewServer(ctx, logName),
-		actionServer:  action.NewServer(ctx, &storage, &l, locked, lockecChan),
-		syncClient:    nil,
-		ctx:           ctx,
-		wg:            sync.WaitGroup{},
-		fianalizeFunc: finalizeFunc,
-	}, nil
-}
-
-// Stop by stop context
-func (yurt *Yurt) Stop() {
-	yurt.fianalizeFunc()
-	fmt.Println("root context has cancel")
-	yurt.wg.Wait()
-}
-
-// Start is yurt starts service function
-func (yurt *Yurt) Start(syncPort string, actionPort string) error {
-	err := yurt.syncServer.Start(syncPort, &yurt.wg)
-	if err != nil {
-		return err
-	}
-	err = yurt.actionServer.Start(actionPort, &yurt.wg)
-	if err != nil {
-		return err
-	}
-
-	return err
-}
 
 var (
 	help       bool
@@ -85,8 +32,7 @@ func main() {
 		return
 	}
 	rootContext, finalizeFunc := context.WithCancel(context.Background())
-	lockedChan := make(chan bool)
-	yurt, err := NewYurt(rootContext, finalizeFunc, logName, false, lockedChan)
+	yurt, err := yurt.NewYurt(rootContext, finalizeFunc, logName, false, yconst.PRIMARY)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -94,12 +40,11 @@ func main() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	// c := make(chan os.Signal, 1)
-	// signal.Notify(c, os.Interrupt, os.Kill)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill)
 
-	// s := <-c
+	s := <-c
 
-	// fmt.Println("Got signal:", s)
-	time.Sleep(20 * time.Second)
+	fmt.Println("Got signal:", s)
 	yurt.Stop()
 }
