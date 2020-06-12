@@ -13,25 +13,27 @@ import (
 
 // ServerConfig is config from yurt
 type ServerConfig struct {
-	Stage       string
-	PrimaryAddr string
+	Stage    string
+	SyncAddr string
 }
 
 // Server for other sync
 type Server struct {
 	syncSeek map[string]log.Log
 	ctx      context.Context
+	wg       *sync.WaitGroup
 	logName  string
 	config   *ServerConfig
 }
 
 // NewServer is a help function
-func NewServer(ctx context.Context, logName string, config *ServerConfig) Server {
+func NewServer(ctx context.Context, logName string, config *ServerConfig, wg *sync.WaitGroup) Server {
 	return Server{
 		syncSeek: make(map[string]log.Log),
 		ctx:      ctx,
 		logName:  logName,
 		config:   config,
+		wg:       wg,
 	}
 }
 
@@ -101,14 +103,14 @@ func (s *Server) Sync(stream LogSync_SyncServer) error {
 }
 
 // Start service for sync
-func (s *Server) Start(port string, wg *sync.WaitGroup) error {
+func (s *Server) Start(port string) error {
 	syncServer := grpc.NewServer()
 	RegisterLogSyncServer(syncServer, s)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		return err
 	}
-	wg.Add(1)
+	s.wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		fmt.Printf("sync server listen on %s\n", port)
 		go func(wg *sync.WaitGroup) {
@@ -121,9 +123,9 @@ func (s *Server) Start(port string, wg *sync.WaitGroup) error {
 					return
 				}
 			}
-		}(wg)
+		}(s.wg)
 		syncServer.Serve(lis)
-	}(wg)
+	}(s.wg)
 
 	return nil
 }

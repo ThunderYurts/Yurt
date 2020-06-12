@@ -16,7 +16,6 @@ import (
 type ServerConfig struct {
 	Stage  string
 	Locked bool
-	
 }
 
 // Server for handling rpc request
@@ -25,15 +24,17 @@ type Server struct {
 	log     log.Log
 	ctx     context.Context
 	config  *ServerConfig
+	wg      *sync.WaitGroup
 }
 
 // NewServer is a help function
-func NewServer(ctx context.Context, storage storage.Storage, log log.Log, config *ServerConfig) Server {
+func NewServer(ctx context.Context, storage storage.Storage, log log.Log, config *ServerConfig, wg *sync.WaitGroup) Server {
 	return Server{
 		storage: storage,
 		log:     log,
 		ctx:     ctx,
 		config:  config,
+		wg:      wg,
 	}
 }
 
@@ -98,14 +99,14 @@ func (s *Server) Delete(ctx context.Context, in *DeleteRequest) (*DeleteReply, e
 }
 
 // Start service for action
-func (s *Server) Start(port string, wg *sync.WaitGroup) error {
+func (s *Server) Start(port string) error {
 	actionServer := grpc.NewServer()
 	RegisterActionServer(actionServer, s)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		return err
 	}
-	wg.Add(1)
+	s.wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		fmt.Printf("action server listen on %s\n", port)
 		go func(wg *sync.WaitGroup) {
@@ -118,8 +119,8 @@ func (s *Server) Start(port string, wg *sync.WaitGroup) error {
 					return
 				}
 			}
-		}(wg)
+		}(s.wg)
 		actionServer.Serve(lis)
-	}(wg)
+	}(s.wg)
 	return nil
 }

@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/ThunderYurts/Yurt/yconst"
 	"github.com/ThunderYurts/Yurt/yurt"
 )
 
@@ -32,8 +31,8 @@ func main() {
 		return
 	}
 	rootContext, finalizeFunc := context.WithCancel(context.Background())
-	
-	yurt, err := yurt.NewYurt(rootContext, finalizeFunc, "primary", logName, false, yconst.PRIMARY)
+
+	yurt, err := yurt.NewYurt(rootContext, finalizeFunc, "primary", logName)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
