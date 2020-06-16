@@ -17,4 +17,6 @@ const (
 	ServiceRoot = "/service"
 	// EmptyIP will give a default value to register
 	EmptyIP = ""
+	// TotalSlotNum is the num of slots
+	TotalSlotNum = 11384
 )

@@ -6,4 +6,5 @@ type Storage interface {
 	Put(key string, value string) error
 	Read(key string) (string, error)
 	LoadLog(logs []string) error
+	KeySet() []string
 }

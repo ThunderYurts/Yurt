@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.24.0
 // 	protoc        v3.5.1
-// source: protoc/ysync.proto
+// source: ysync.proto
 
 package ysync
 
@@ -59,11 +59,11 @@ func (x SyncCode) String() string {
 }
 
 func (SyncCode) Descriptor() protoreflect.EnumDescriptor {
-	return file_protoc_ysync_proto_enumTypes[0].Descriptor()
+	return file_ysync_proto_enumTypes[0].Descriptor()
 }
 
 func (SyncCode) Type() protoreflect.EnumType {
-	return &file_protoc_ysync_proto_enumTypes[0]
+	return &file_ysync_proto_enumTypes[0]
 }
 
 func (x SyncCode) Number() protoreflect.EnumNumber {
@@ -72,7 +72,53 @@ func (x SyncCode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SyncCode.Descriptor instead.
 func (SyncCode) EnumDescriptor() ([]byte, []int) {
-	return file_protoc_ysync_proto_rawDescGZIP(), []int{0}
+	return file_ysync_proto_rawDescGZIP(), []int{0}
+}
+
+type SlotCode int32
+
+const (
+	SlotCode_SLOT_SUCCESS SlotCode = 0
+	SlotCode_SLOT_ERROR   SlotCode = 1
+)
+
+// Enum value maps for SlotCode.
+var (
+	SlotCode_name = map[int32]string{
+		0: "SLOT_SUCCESS",
+		1: "SLOT_ERROR",
+	}
+	SlotCode_value = map[string]int32{
+		"SLOT_SUCCESS": 0,
+		"SLOT_ERROR":   1,
+	}
+)
+
+func (x SlotCode) Enum() *SlotCode {
+	p := new(SlotCode)
+	*p = x
+	return p
+}
+
+func (x SlotCode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SlotCode) Descriptor() protoreflect.EnumDescriptor {
+	return file_ysync_proto_enumTypes[1].Descriptor()
+}
+
+func (SlotCode) Type() protoreflect.EnumType {
+	return &file_ysync_proto_enumTypes[1]
+}
+
+func (x SlotCode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SlotCode.Descriptor instead.
+func (SlotCode) EnumDescriptor() ([]byte, []int) {
+	return file_ysync_proto_rawDescGZIP(), []int{1}
 }
 
 type SyncRequest struct {
@@ -87,7 +133,7 @@ type SyncRequest struct {
 func (x *SyncRequest) Reset() {
 	*x = SyncRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protoc_ysync_proto_msgTypes[0]
+		mi := &file_ysync_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -100,7 +146,7 @@ func (x *SyncRequest) String() string {
 func (*SyncRequest) ProtoMessage() {}
 
 func (x *SyncRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protoc_ysync_proto_msgTypes[0]
+	mi := &file_ysync_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -113,7 +159,7 @@ func (x *SyncRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SyncRequest.ProtoReflect.Descriptor instead.
 func (*SyncRequest) Descriptor() ([]byte, []int) {
-	return file_protoc_ysync_proto_rawDescGZIP(), []int{0}
+	return file_ysync_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *SyncRequest) GetName() string {
@@ -143,7 +189,7 @@ type SyncReply struct {
 func (x *SyncReply) Reset() {
 	*x = SyncReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_protoc_ysync_proto_msgTypes[1]
+		mi := &file_ysync_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -156,7 +202,7 @@ func (x *SyncReply) String() string {
 func (*SyncReply) ProtoMessage() {}
 
 func (x *SyncReply) ProtoReflect() protoreflect.Message {
-	mi := &file_protoc_ysync_proto_msgTypes[1]
+	mi := &file_ysync_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -169,7 +215,7 @@ func (x *SyncReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SyncReply.ProtoReflect.Descriptor instead.
 func (*SyncReply) Descriptor() ([]byte, []int) {
-	return file_protoc_ysync_proto_rawDescGZIP(), []int{1}
+	return file_ysync_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SyncReply) GetCode() SyncCode {
@@ -193,68 +239,197 @@ func (x *SyncReply) GetLastIndex() int32 {
 	return 0
 }
 
-var File_protoc_ysync_proto protoreflect.FileDescriptor
+type SlotRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
 
-var file_protoc_ysync_proto_rawDesc = []byte{
-	0x0a, 0x12, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x2f, 0x79, 0x73, 0x79, 0x6e, 0x63, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x05, 0x79, 0x73, 0x79, 0x6e, 0x63, 0x22, 0x37, 0x0a, 0x0b, 0x53,
-	0x79, 0x6e, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x4e, 0x61,
-	0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x14,
-	0x0a, 0x05, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x49,
-	0x6e, 0x64, 0x65, 0x78, 0x22, 0x62, 0x0a, 0x09, 0x53, 0x79, 0x6e, 0x63, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x12, 0x23, 0x0a, 0x04, 0x43, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32,
-	0x0f, 0x2e, 0x79, 0x73, 0x79, 0x6e, 0x63, 0x2e, 0x53, 0x79, 0x6e, 0x63, 0x43, 0x6f, 0x64, 0x65,
-	0x52, 0x04, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x4c, 0x6f, 0x67, 0x73, 0x18, 0x02,
-	0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x4c, 0x6f, 0x67, 0x73, 0x12, 0x1c, 0x0a, 0x09, 0x4c, 0x61,
-	0x73, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x4c,
-	0x61, 0x73, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x2a, 0x2c, 0x0a, 0x08, 0x53, 0x79, 0x6e, 0x63,
-	0x43, 0x6f, 0x64, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x53, 0x59, 0x4e, 0x43, 0x5f, 0x53, 0x55, 0x43,
-	0x43, 0x45, 0x53, 0x53, 0x10, 0x00, 0x12, 0x0e, 0x0a, 0x0a, 0x53, 0x59, 0x4e, 0x43, 0x5f, 0x45,
-	0x52, 0x52, 0x4f, 0x52, 0x10, 0x01, 0x32, 0x3d, 0x0a, 0x07, 0x4c, 0x6f, 0x67, 0x53, 0x79, 0x6e,
-	0x63, 0x12, 0x32, 0x0a, 0x04, 0x53, 0x79, 0x6e, 0x63, 0x12, 0x12, 0x2e, 0x79, 0x73, 0x79, 0x6e,
-	0x63, 0x2e, 0x53, 0x79, 0x6e, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x10, 0x2e,
-	0x79, 0x73, 0x79, 0x6e, 0x63, 0x2e, 0x53, 0x79, 0x6e, 0x63, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22,
-	0x00, 0x28, 0x01, 0x30, 0x01, 0x42, 0x09, 0x5a, 0x07, 0x2e, 0x3b, 0x79, 0x73, 0x79, 0x6e, 0x63,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	Begin uint32 `protobuf:"varint,1,opt,name=Begin,proto3" json:"Begin,omitempty"`
+	End   uint32 `protobuf:"varint,2,opt,name=End,proto3" json:"End,omitempty"`
+}
+
+func (x *SlotRequest) Reset() {
+	*x = SlotRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ysync_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SlotRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SlotRequest) ProtoMessage() {}
+
+func (x *SlotRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ysync_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SlotRequest.ProtoReflect.Descriptor instead.
+func (*SlotRequest) Descriptor() ([]byte, []int) {
+	return file_ysync_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SlotRequest) GetBegin() uint32 {
+	if x != nil {
+		return x.Begin
+	}
+	return 0
+}
+
+func (x *SlotRequest) GetEnd() uint32 {
+	if x != nil {
+		return x.End
+	}
+	return 0
+}
+
+type SlotReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Code SlotCode `protobuf:"varint,1,opt,name=Code,proto3,enum=ysync.SlotCode" json:"Code,omitempty"`
+	Logs []string `protobuf:"bytes,2,rep,name=Logs,proto3" json:"Logs,omitempty"`
+}
+
+func (x *SlotReply) Reset() {
+	*x = SlotReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ysync_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SlotReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SlotReply) ProtoMessage() {}
+
+func (x *SlotReply) ProtoReflect() protoreflect.Message {
+	mi := &file_ysync_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SlotReply.ProtoReflect.Descriptor instead.
+func (*SlotReply) Descriptor() ([]byte, []int) {
+	return file_ysync_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *SlotReply) GetCode() SlotCode {
+	if x != nil {
+		return x.Code
+	}
+	return SlotCode_SLOT_SUCCESS
+}
+
+func (x *SlotReply) GetLogs() []string {
+	if x != nil {
+		return x.Logs
+	}
+	return nil
+}
+
+var File_ysync_proto protoreflect.FileDescriptor
+
+var file_ysync_proto_rawDesc = []byte{
+	0x0a, 0x0b, 0x79, 0x73, 0x79, 0x6e, 0x63, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x05, 0x79,
+	0x73, 0x79, 0x6e, 0x63, 0x22, 0x37, 0x0a, 0x0b, 0x53, 0x79, 0x6e, 0x63, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x49, 0x6e, 0x64, 0x65, 0x78,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x22, 0x62, 0x0a,
+	0x09, 0x53, 0x79, 0x6e, 0x63, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x23, 0x0a, 0x04, 0x43, 0x6f,
+	0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x0f, 0x2e, 0x79, 0x73, 0x79, 0x6e, 0x63,
+	0x2e, 0x53, 0x79, 0x6e, 0x63, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x04, 0x43, 0x6f, 0x64, 0x65, 0x12,
+	0x12, 0x0a, 0x04, 0x4c, 0x6f, 0x67, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x4c,
+	0x6f, 0x67, 0x73, 0x12, 0x1c, 0x0a, 0x09, 0x4c, 0x61, 0x73, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x4c, 0x61, 0x73, 0x74, 0x49, 0x6e, 0x64, 0x65,
+	0x78, 0x22, 0x35, 0x0a, 0x0b, 0x53, 0x6c, 0x6f, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x14, 0x0a, 0x05, 0x42, 0x65, 0x67, 0x69, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x05, 0x42, 0x65, 0x67, 0x69, 0x6e, 0x12, 0x10, 0x0a, 0x03, 0x45, 0x6e, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0d, 0x52, 0x03, 0x45, 0x6e, 0x64, 0x22, 0x44, 0x0a, 0x09, 0x53, 0x6c, 0x6f, 0x74,
+	0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x23, 0x0a, 0x04, 0x43, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x0f, 0x2e, 0x79, 0x73, 0x79, 0x6e, 0x63, 0x2e, 0x53, 0x6c, 0x6f, 0x74,
+	0x43, 0x6f, 0x64, 0x65, 0x52, 0x04, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x4c, 0x6f,
+	0x67, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x4c, 0x6f, 0x67, 0x73, 0x2a, 0x2c,
+	0x0a, 0x08, 0x53, 0x79, 0x6e, 0x63, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x53, 0x59,
+	0x4e, 0x43, 0x5f, 0x53, 0x55, 0x43, 0x43, 0x45, 0x53, 0x53, 0x10, 0x00, 0x12, 0x0e, 0x0a, 0x0a,
+	0x53, 0x59, 0x4e, 0x43, 0x5f, 0x45, 0x52, 0x52, 0x4f, 0x52, 0x10, 0x01, 0x2a, 0x2c, 0x0a, 0x08,
+	0x53, 0x6c, 0x6f, 0x74, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x53, 0x4c, 0x4f, 0x54,
+	0x5f, 0x53, 0x55, 0x43, 0x43, 0x45, 0x53, 0x53, 0x10, 0x00, 0x12, 0x0e, 0x0a, 0x0a, 0x53, 0x4c,
+	0x4f, 0x54, 0x5f, 0x45, 0x52, 0x52, 0x4f, 0x52, 0x10, 0x01, 0x32, 0x71, 0x0a, 0x07, 0x4c, 0x6f,
+	0x67, 0x53, 0x79, 0x6e, 0x63, 0x12, 0x32, 0x0a, 0x04, 0x53, 0x79, 0x6e, 0x63, 0x12, 0x12, 0x2e,
+	0x79, 0x73, 0x79, 0x6e, 0x63, 0x2e, 0x53, 0x79, 0x6e, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x10, 0x2e, 0x79, 0x73, 0x79, 0x6e, 0x63, 0x2e, 0x53, 0x79, 0x6e, 0x63, 0x52, 0x65,
+	0x70, 0x6c, 0x79, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x12, 0x32, 0x0a, 0x08, 0x53, 0x6c, 0x6f,
+	0x74, 0x53, 0x79, 0x6e, 0x63, 0x12, 0x12, 0x2e, 0x79, 0x73, 0x79, 0x6e, 0x63, 0x2e, 0x53, 0x6c,
+	0x6f, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x10, 0x2e, 0x79, 0x73, 0x79, 0x6e,
+	0x63, 0x2e, 0x53, 0x6c, 0x6f, 0x74, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x42, 0x09, 0x5a,
+	0x07, 0x2e, 0x3b, 0x79, 0x73, 0x79, 0x6e, 0x63, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_protoc_ysync_proto_rawDescOnce sync.Once
-	file_protoc_ysync_proto_rawDescData = file_protoc_ysync_proto_rawDesc
+	file_ysync_proto_rawDescOnce sync.Once
+	file_ysync_proto_rawDescData = file_ysync_proto_rawDesc
 )
 
-func file_protoc_ysync_proto_rawDescGZIP() []byte {
-	file_protoc_ysync_proto_rawDescOnce.Do(func() {
-		file_protoc_ysync_proto_rawDescData = protoimpl.X.CompressGZIP(file_protoc_ysync_proto_rawDescData)
+func file_ysync_proto_rawDescGZIP() []byte {
+	file_ysync_proto_rawDescOnce.Do(func() {
+		file_ysync_proto_rawDescData = protoimpl.X.CompressGZIP(file_ysync_proto_rawDescData)
 	})
-	return file_protoc_ysync_proto_rawDescData
+	return file_ysync_proto_rawDescData
 }
 
-var file_protoc_ysync_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_protoc_ysync_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_protoc_ysync_proto_goTypes = []interface{}{
+var file_ysync_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_ysync_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_ysync_proto_goTypes = []interface{}{
 	(SyncCode)(0),       // 0: ysync.SyncCode
-	(*SyncRequest)(nil), // 1: ysync.SyncRequest
-	(*SyncReply)(nil),   // 2: ysync.SyncReply
+	(SlotCode)(0),       // 1: ysync.SlotCode
+	(*SyncRequest)(nil), // 2: ysync.SyncRequest
+	(*SyncReply)(nil),   // 3: ysync.SyncReply
+	(*SlotRequest)(nil), // 4: ysync.SlotRequest
+	(*SlotReply)(nil),   // 5: ysync.SlotReply
 }
-var file_protoc_ysync_proto_depIdxs = []int32{
+var file_ysync_proto_depIdxs = []int32{
 	0, // 0: ysync.SyncReply.Code:type_name -> ysync.SyncCode
-	1, // 1: ysync.LogSync.Sync:input_type -> ysync.SyncRequest
-	2, // 2: ysync.LogSync.Sync:output_type -> ysync.SyncReply
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 1: ysync.SlotReply.Code:type_name -> ysync.SlotCode
+	2, // 2: ysync.LogSync.Sync:input_type -> ysync.SyncRequest
+	4, // 3: ysync.LogSync.SlotSync:input_type -> ysync.SlotRequest
+	3, // 4: ysync.LogSync.Sync:output_type -> ysync.SyncReply
+	5, // 5: ysync.LogSync.SlotSync:output_type -> ysync.SlotReply
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_protoc_ysync_proto_init() }
-func file_protoc_ysync_proto_init() {
-	if File_protoc_ysync_proto != nil {
+func init() { file_ysync_proto_init() }
+func file_ysync_proto_init() {
+	if File_ysync_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_protoc_ysync_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_ysync_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SyncRequest); i {
 			case 0:
 				return &v.state
@@ -266,8 +441,32 @@ func file_protoc_ysync_proto_init() {
 				return nil
 			}
 		}
-		file_protoc_ysync_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_ysync_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SyncReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ysync_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SlotRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ysync_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SlotReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -283,21 +482,21 @@ func file_protoc_ysync_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_protoc_ysync_proto_rawDesc,
-			NumEnums:      1,
-			NumMessages:   2,
+			RawDescriptor: file_ysync_proto_rawDesc,
+			NumEnums:      2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_protoc_ysync_proto_goTypes,
-		DependencyIndexes: file_protoc_ysync_proto_depIdxs,
-		EnumInfos:         file_protoc_ysync_proto_enumTypes,
-		MessageInfos:      file_protoc_ysync_proto_msgTypes,
+		GoTypes:           file_ysync_proto_goTypes,
+		DependencyIndexes: file_ysync_proto_depIdxs,
+		EnumInfos:         file_ysync_proto_enumTypes,
+		MessageInfos:      file_ysync_proto_msgTypes,
 	}.Build()
-	File_protoc_ysync_proto = out.File
-	file_protoc_ysync_proto_rawDesc = nil
-	file_protoc_ysync_proto_goTypes = nil
-	file_protoc_ysync_proto_depIdxs = nil
+	File_ysync_proto = out.File
+	file_ysync_proto_rawDesc = nil
+	file_ysync_proto_goTypes = nil
+	file_ysync_proto_depIdxs = nil
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -313,6 +512,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type LogSyncClient interface {
 	Sync(ctx context.Context, opts ...grpc.CallOption) (LogSync_SyncClient, error)
+	SlotSync(ctx context.Context, in *SlotRequest, opts ...grpc.CallOption) (*SlotReply, error)
 }
 
 type logSyncClient struct {
@@ -354,9 +554,19 @@ func (x *logSyncSyncClient) Recv() (*SyncReply, error) {
 	return m, nil
 }
 
+func (c *logSyncClient) SlotSync(ctx context.Context, in *SlotRequest, opts ...grpc.CallOption) (*SlotReply, error) {
+	out := new(SlotReply)
+	err := c.cc.Invoke(ctx, "/ysync.LogSync/SlotSync", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LogSyncServer is the server API for LogSync service.
 type LogSyncServer interface {
 	Sync(LogSync_SyncServer) error
+	SlotSync(context.Context, *SlotRequest) (*SlotReply, error)
 }
 
 // UnimplementedLogSyncServer can be embedded to have forward compatible implementations.
@@ -365,6 +575,9 @@ type UnimplementedLogSyncServer struct {
 
 func (*UnimplementedLogSyncServer) Sync(LogSync_SyncServer) error {
 	return status.Errorf(codes.Unimplemented, "method Sync not implemented")
+}
+func (*UnimplementedLogSyncServer) SlotSync(context.Context, *SlotRequest) (*SlotReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SlotSync not implemented")
 }
 
 func RegisterLogSyncServer(s *grpc.Server, srv LogSyncServer) {
@@ -397,10 +610,33 @@ func (x *logSyncSyncServer) Recv() (*SyncRequest, error) {
 	return m, nil
 }
 
+func _LogSync_SlotSync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SlotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogSyncServer).SlotSync(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ysync.LogSync/SlotSync",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogSyncServer).SlotSync(ctx, req.(*SlotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _LogSync_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ysync.LogSync",
 	HandlerType: (*LogSyncServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SlotSync",
+			Handler:    _LogSync_SlotSync_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Sync",
@@ -409,5 +645,5 @@ var _LogSync_serviceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "protoc/ysync.proto",
+	Metadata: "ysync.proto",
 }

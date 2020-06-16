@@ -3,8 +3,12 @@ package ysync
 import (
 	"context"
 	"fmt"
+	"github.com/ThunderYurts/Yurt/storage"
+	"github.com/ThunderYurts/Yurt/yconst"
+	"hash/crc32"
 	"io"
 	"net"
+	"strconv"
 	sync "sync"
 
 	"github.com/ThunderYurts/Yurt/log"
@@ -24,17 +28,43 @@ type Server struct {
 	wg       *sync.WaitGroup
 	logName  string
 	config   *ServerConfig
+	storage  storage.Storage
 }
 
 // NewServer is a help function
-func NewServer(ctx context.Context, logName string, config *ServerConfig, wg *sync.WaitGroup) Server {
+func NewServer(ctx context.Context, logName string, config *ServerConfig, wg *sync.WaitGroup, storage storage.Storage) Server {
 	return Server{
 		syncSeek: make(map[string]log.Log),
 		ctx:      ctx,
 		logName:  logName,
 		config:   config,
 		wg:       wg,
+		storage:  storage,
 	}
+}
+
+func (s *Server) SlotSync(ctx context.Context, in *SlotRequest) (reply *SlotReply, err error) {
+	begin := in.Begin
+	end := in.End
+	keys := s.storage.KeySet()
+	var logs []string
+	count := 0
+	for _, key := range keys {
+		slot := crc32.ChecksumIEEE([]byte(key)) % yconst.TotalSlotNum
+		fmt.Printf("slot: %v begin: %v end: %v\n", slot, begin, end)
+		if slot >= begin && slot < end { // [begin, end)
+			value ,err := s.storage.Read(key)
+			if err != nil {
+				return nil ,err
+			}
+			commit := "P " + key + " " + value + " " + strconv.Itoa(count)
+			logs = append(logs, commit)
+			count = count + 1
+		}
+	}
+	fmt.Printf("logs: %v\n", logs)
+	return &SlotReply{Code: SlotCode_SLOT_SUCCESS, Logs: logs}, nil
+
 }
 
 // Sync which means we are giving logs to others

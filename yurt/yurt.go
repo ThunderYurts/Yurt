@@ -63,7 +63,7 @@ func NewYurt(ctx context.Context, finalizeFunc context.CancelFunc, name string, 
 	channel := make(chan []byte, 100)
 	wg := &sync.WaitGroup{}
 	return Yurt{
-		syncServer:    ysync.NewServer(ctx, logName, syncServerConfig, wg),
+		syncServer:    ysync.NewServer(ctx, logName, syncServerConfig, wg, &storage),
 		actionServer:  action.NewServer(ctx, &storage, &l, actionServerConfig, wg),
 		syncClient:    nil,
 		ctx:           ctx,
@@ -101,7 +101,7 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 	if err != nil {
 		return err
 	}
-	fmt.Printf("zeus register %s\n", service)
+	fmt.Printf("zeus dispatch to service %s\n", service)
 	err = yurt.register.ServiceRegister(service, ip+actionPort)
 	if err != nil {
 		fmt.Println("err in 107")
@@ -171,6 +171,40 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 						err = dec.Decode(&srv)
 						if err != nil {
 							panic(err)
+						}
+						// TODO syncHost check and sync Data
+						fmt.Printf("original srv value %v\n", srv)
+						if srv.SyncHost != "" {
+							// we need sync data from others
+							// get now primary from serviceHost
+							data, _, err := conn.Get(yconst.ServiceRoot+ "/" + srv.SyncHost)
+							dec := gob.NewDecoder(bytes.NewBuffer(data))
+							syncTarget := zookeeper.ZKServiceHost{}
+							err = dec.Decode(&syncTarget)
+							if err != nil {
+								panic(err)
+							}
+							fmt.Printf("syncTarget %v\n", syncTarget.SecondarySyncHost)
+							connAction, err := grpc.Dial(syncTarget.SecondarySyncHost, grpc.WithInsecure())
+							if err != nil {
+								panic(err)
+							}
+							yurt.syncClient = ysync.NewLogSyncClient(connAction)
+							slotReply, err := yurt.syncClient.SlotSync(yurt.ctx, &ysync.SlotRequest{Begin: srv.SlotBegin, End: srv.SlotEnd})
+							if err != nil {
+								panic(err)
+							}
+							if slotReply.Code != ysync.SlotCode_SLOT_SUCCESS {
+								panic(slotReply)
+							}
+							fmt.Println(slotReply.Logs)
+							err = yurt.storage.LoadLog(slotReply.Logs)
+							if err != nil {
+								panic(err)
+							}
+							srv.SyncHost = ""
+						} else {
+							// check log in the file
 						}
 						srv.Secondary = newSecondary
 						srv.Primary = ip + actionPort

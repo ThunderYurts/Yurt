@@ -48,29 +48,33 @@ func (r *Register) Register() (string, error) {
 		r.serviceName = reg.ServiceName
 		return reg.ServiceName, nil
 	}
-	for {
-		select {
-		case e := <-ch:
-			{
-				// zeus scheduler has work done
-				if e.Type == zk.EventNodeDataChanged {
-					data, _, _, err := r.conn.GetW(yconst.YurtRoot + "/" + r.yurtName)
+	select {
+	case e := <-ch:
+		{
+			// zeus scheduler has work done
+			if e.Type == zk.EventNodeDataChanged {
+				data, stat, _, err := r.conn.GetW(yconst.YurtRoot + "/" + r.yurtName)
+				if err != nil {
+					return "", err
+				}
+				if len(data) > 0 {
+					// has get register response
+					dec := gob.NewDecoder(bytes.NewBuffer(data))
+					reg := ZKRegister{}
+					err = dec.Decode(&reg)
+					r.serviceName = reg.ServiceName
+					// clean up the yurt
+					err = r.conn.Delete(yconst.YurtRoot+"/"+r.yurtName, stat.Version)
 					if err != nil {
+						fmt.Printf("error in 70 %s\n", err.Error())
 						return "", err
 					}
-					if len(data) > 0 {
-						// has get register response
-						dec := gob.NewDecoder(bytes.NewBuffer(data))
-						reg := ZKRegister{}
-						err = dec.Decode(&reg)
-						r.serviceName = reg.ServiceName
-						return reg.ServiceName, nil
-					}
-					return "", errors.New("invalid register info format")
+					return reg.ServiceName, nil
 				}
 			}
 		}
 	}
+	return "", errors.New("invalid register info format")
 }
 
 // ServiceRegister will use conn to create register node with ZKServiceRegister

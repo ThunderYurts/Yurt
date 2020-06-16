@@ -111,3 +111,16 @@ func (m *Memory) LoadLog(logs []string) error {
 
 	return nil
 }
+
+func (m *Memory) KeySet() []string {
+	// TODO check whether the lock is needed
+	m.Lock()
+	j := 0
+	keys := make([]string, len(m.mapping))
+	for k := range m.mapping {
+		keys[j] = k
+		j++
+	}
+	m.Unlock()
+	return keys
+}

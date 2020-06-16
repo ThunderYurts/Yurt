@@ -106,6 +106,25 @@ func (s *Server) Start(port string) error {
 	if err != nil {
 		return err
 	}
+	index := int32(0)
+	//if s.config.Stage == yconst.PRIMARY {
+	//
+	//}
+	for {
+		logs, newIndex , err := s.log.LoadLog(index)
+		if err != nil {
+			panic(err)
+		}
+		err = s.storage.LoadLog(logs)
+		if err != nil {
+			panic(err)
+		}
+		if newIndex == index {
+			break
+		}
+		fmt.Printf("index : %v, newIndex: %v\n", index, newIndex)
+		index = newIndex
+	}
 	s.wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		fmt.Printf("action server listen on %s\n", port)
@@ -120,7 +139,7 @@ func (s *Server) Start(port string) error {
 				}
 			}
 		}(s.wg)
-		actionServer.Serve(lis)
+		_ = actionServer.Serve(lis)
 	}(s.wg)
 	return nil
 }

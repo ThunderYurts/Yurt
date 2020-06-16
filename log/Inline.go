@@ -22,9 +22,9 @@ type Inline struct {
 
 // NewLogInline is an help function
 func NewLogInline(filename string) (Inline, error) {
-	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND, 0666)
+	f, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil && os.IsNotExist(err) {
-		f, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+		f, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	}
 	if err != nil {
 		return Inline{}, err

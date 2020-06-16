@@ -45,7 +45,6 @@ func (cw *ConfigWatcher) Start() {
 			select {
 			case e := <-getCh:
 				{
-					fmt.Printf("in config watcher event: %v\n", e)
 					if e.Type == zk.EventNodeCreated {
 						fmt.Printf("has new node[%s] create\n", e.Path)
 					} else if e.Type == zk.EventNodeDeleted {

@@ -5,11 +5,17 @@ package ysync;
 
 service LogSync {
     rpc Sync(stream SyncRequest) returns (stream SyncReply) {}
+    rpc SlotSync(SlotRequest) returns (SlotReply) {}
 }
 
 enum SyncCode {
     SYNC_SUCCESS = 0;
     SYNC_ERROR = 1;
+}
+
+enum SlotCode {
+    SLOT_SUCCESS = 0;
+    SLOT_ERROR = 1;
 }
 
 message SyncRequest {
@@ -21,4 +27,14 @@ message SyncReply {
     SyncCode Code = 1;
     repeated string Logs = 2;
     int32 LastIndex = 3;
+}
+
+message SlotRequest {
+    uint32 Begin = 1;
+    uint32 End = 2;
+}
+
+message SlotReply {
+    SlotCode Code = 1;
+    repeated string Logs = 2;
 }

@@ -54,7 +54,6 @@ func (p *Preemptive) Preemptive(data []byte) {
 						return
 					}
 					time.Sleep(1 * time.Second)
-					fmt.Println(err.Error())
 				}
 			}
 		}
