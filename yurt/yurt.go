@@ -41,6 +41,7 @@ type Yurt struct {
 	syncServer    ysync.Server
 	actionServer  action.Server
 	syncClient    ysync.LogSyncClient
+	log           log.Log
 	ctx           context.Context
 	wg            *sync.WaitGroup
 	fianalizeFunc context.CancelFunc
@@ -63,9 +64,10 @@ func NewYurt(ctx context.Context, finalizeFunc context.CancelFunc, name string, 
 	channel := make(chan []byte, 100)
 	wg := &sync.WaitGroup{}
 	return Yurt{
-		syncServer:    ysync.NewServer(ctx, logName, syncServerConfig, wg, &storage),
+		syncServer:    ysync.NewServer(ctx, logName, syncServerConfig, wg, &storage, &l),
 		actionServer:  action.NewServer(ctx, &storage, &l, actionServerConfig, wg),
 		syncClient:    nil,
+		log:           &l,
 		ctx:           ctx,
 		wg:            wg,
 		fianalizeFunc: finalizeFunc,
@@ -177,7 +179,7 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 						if srv.SyncHost != "" {
 							// we need sync data from others
 							// get now primary from serviceHost
-							data, _, err := conn.Get(yconst.ServiceRoot+ "/" + srv.SyncHost)
+							data, _, err := conn.Get(yconst.ServiceRoot + "/" + srv.SyncHost)
 							dec := gob.NewDecoder(bytes.NewBuffer(data))
 							syncTarget := zookeeper.ZKServiceHost{}
 							err = dec.Decode(&syncTarget)
@@ -203,8 +205,6 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 								panic(err)
 							}
 							srv.SyncHost = ""
-						} else {
-							// check log in the file
 						}
 						srv.Secondary = newSecondary
 						srv.Primary = ip + actionPort
@@ -232,8 +232,9 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 									for _, child := range children {
 										childrenSet.Add(child)
 									}
-									if childrenSet.Difference(stableChildrenSet).Cardinality() == 0 {
+									if childrenSet.Difference(stableChildrenSet).Cardinality() == 0 && stableChildrenSet.Difference(childrenSet).Cardinality() == 0 {
 										// no diff
+										fmt.Println("no diff")
 										continue
 									}
 									stableChildrenSet = childrenSet
@@ -303,7 +304,6 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 			select {
 			case data := <-yurt.config.channel:
 				{
-					fmt.Println("get config")
 					dec := gob.NewDecoder(bytes.NewBuffer(data))
 					srv := zookeeper.ZKServiceHost{}
 					err = dec.Decode(&srv)
@@ -311,7 +311,9 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 						panic(err)
 					}
 					fmt.Printf("get config %v\n", srv)
-
+					if srv.Primary == "" {
+						continue
+					}
 					if srv.Primary != ip+actionPort {
 						// I'm not primary start sync
 						fmt.Printf("I'm not primary start sync %s\n", ip+actionPort)
@@ -343,14 +345,8 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 	go func() {
 		defer yurt.wg.Done()
 		fmt.Println("secondary starts sync routine")
-		l, err := log.NewLogInline(yurt.config.LogName)
-		if err != nil {
-			fmt.Println("312")
-			fmt.Println(err.Error())
-			return
-		}
 		var syncLog log.Log
-		syncLog = &l
+		syncLog = yurt.log
 	sync:
 		for {
 			select {
@@ -381,7 +377,9 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 			fmt.Println(err.Error())
 			return
 		}
-		index := int32(0)
+		// TODO index should load from dfile
+		index := syncLog.GetIndex()
+		fmt.Printf("current index %v\n", *index)
 		for {
 			select {
 			case <-yurt.ctx.Done():
@@ -393,6 +391,7 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 			case synced := <-syncChannel:
 				{
 					if synced {
+						// primary changed
 						syncConn, err = grpc.Dial(yurt.config.SyncServerConfig.SyncAddr, grpc.WithInsecure())
 						if err != nil {
 							fmt.Println("362")
@@ -415,7 +414,8 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 			default:
 				{
 					// TODO use yurt name
-					err = stream.Send(&ysync.SyncRequest{Name: yurt.config.Name, Index: index})
+					err = stream.Send(&ysync.SyncRequest{Name: yurt.config.Name, Index: *index})
+					//fmt.Printf("send index %v\n", index)
 					res, err := stream.Recv()
 					if err != nil {
 						fmt.Println("385")
@@ -425,16 +425,28 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 					if res.Code == ysync.SyncCode_SYNC_ERROR {
 						return
 					}
+					if res.LastIndex < *index {
+						fmt.Printf("res.LastIndex: %v, index:%v\n", res.LastIndex, *index)
+					}
 					// TODO can do this parallel with lower
 					logs := res.Logs
-					err = syncLog.ImportLog(logs)
+					if len(logs) != 0 {
+						fmt.Printf("log log :%v\n", logs)
+					}
+					err = syncLog.ImportLog(res.LastIndex, logs)
 					if err != nil {
 						fmt.Println("396")
 						fmt.Println(err.Error())
 						return
 					}
-					index = res.LastIndex
-					yurt.storage.LoadLog(logs)
+					// we will check whether logs should redo
+					*index = res.LastIndex
+					err = yurt.storage.LoadLog(logs)
+					if err != nil {
+						fmt.Println("396")
+						fmt.Println(err.Error())
+						return
+					}
 				}
 			}
 		}

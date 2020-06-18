@@ -29,10 +29,11 @@ type Server struct {
 	logName  string
 	config   *ServerConfig
 	storage  storage.Storage
+	log      log.Log
 }
 
 // NewServer is a help function
-func NewServer(ctx context.Context, logName string, config *ServerConfig, wg *sync.WaitGroup, storage storage.Storage) Server {
+func NewServer(ctx context.Context, logName string, config *ServerConfig, wg *sync.WaitGroup, storage storage.Storage, l log.Log) Server {
 	return Server{
 		syncSeek: make(map[string]log.Log),
 		ctx:      ctx,
@@ -40,6 +41,7 @@ func NewServer(ctx context.Context, logName string, config *ServerConfig, wg *sy
 		config:   config,
 		wg:       wg,
 		storage:  storage,
+		log:      l,
 	}
 }
 
@@ -53,9 +55,9 @@ func (s *Server) SlotSync(ctx context.Context, in *SlotRequest) (reply *SlotRepl
 		slot := crc32.ChecksumIEEE([]byte(key)) % yconst.TotalSlotNum
 		fmt.Printf("slot: %v begin: %v end: %v\n", slot, begin, end)
 		if slot >= begin && slot < end { // [begin, end)
-			value ,err := s.storage.Read(key)
+			value, err := s.storage.Read(key)
 			if err != nil {
-				return nil ,err
+				return nil, err
 			}
 			commit := "P " + key + " " + value + " " + strconv.Itoa(count)
 			logs = append(logs, commit)
@@ -98,13 +100,15 @@ func (s *Server) Sync(stream LogSync_SyncServer) error {
 				}
 				index := req.Index
 				name = req.Name
+
 				if index < 0 {
-					stream.Send(&SyncReply{Code: SyncCode_SYNC_ERROR})
-					return nil
+					err = stream.Send(&SyncReply{Code: SyncCode_SYNC_ERROR})
+					return err
 				}
+
 				l, exist := s.syncSeek[req.Name]
 				if !exist {
-					n, err := log.NewLogInlineWithoutCreate(s.logName)
+					n, err := log.NewLogInlineWithoutCreate(s.logName, s.log.GetIndex())
 					if err != nil {
 						return err
 					}
@@ -113,6 +117,7 @@ func (s *Server) Sync(stream LogSync_SyncServer) error {
 				}
 
 				logs, index, err := l.LoadLog(index)
+				fmt.Printf("return log : %v, index :%v\n", logs, index)
 				// TODO can use buffer to reduce connection times
 				if err != nil {
 					// now maybe index not match

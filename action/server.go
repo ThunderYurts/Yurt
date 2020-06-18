@@ -53,13 +53,22 @@ func (s *Server) Read(ctx context.Context, in *ReadRequest) (*ReadReply, error) 
 // Put put key value pair into storage
 func (s *Server) Put(ctx context.Context, in *PutRequest) (*PutReply, error) {
 	// TODO check Lock first
+	fmt.Println("put action")
 	if s.config.Stage == yconst.SECONDARY {
 		return &PutReply{Code: PutCode_PUT_ERROR}, nil
 	}
 	if s.config.Locked {
 		return &PutReply{Code: PutCode_PUT_LOCK}, nil
 	}
-	err := s.log.Put(in.Key, in.Value)
+	oldValue, err := s.storage.Read(in.Key)
+	if err != nil {
+		if err == storage.NOT_FOUND {
+			oldValue = "NOT_FOUND"
+		} else {
+			return &PutReply{Code: PutCode_PUT_ERROR}, err
+		}
+	}
+	err = s.log.Put(in.Key, in.Value, oldValue)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +92,11 @@ func (s *Server) Delete(ctx context.Context, in *DeleteRequest) (*DeleteReply, e
 	if s.config.Locked {
 		return &DeleteReply{Code: DeleteCode_DELETE_LOCK}, nil
 	}
-	err := s.log.Delete(in.Key)
+	oldValue, err := s.storage.Read(in.Key)
+	if err != nil {
+		return &DeleteReply{Code: DeleteCode_DELETE_ERROR}, err
+	}
+	err = s.log.Delete(in.Key, oldValue)
 	if err != nil {
 		return nil, err
 	}
@@ -106,25 +119,25 @@ func (s *Server) Start(port string) error {
 	if err != nil {
 		return err
 	}
-	index := int32(0)
+	//index := int32(0)
 	//if s.config.Stage == yconst.PRIMARY {
 	//
 	//}
-	for {
-		logs, newIndex , err := s.log.LoadLog(index)
-		if err != nil {
-			panic(err)
-		}
-		err = s.storage.LoadLog(logs)
-		if err != nil {
-			panic(err)
-		}
-		if newIndex == index {
-			break
-		}
-		fmt.Printf("index : %v, newIndex: %v\n", index, newIndex)
-		index = newIndex
-	}
+	//for {
+	//	logs, newIndex , err := s.log.LoadLog(index)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	err = s.storage.LoadLog(logs)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	if newIndex == index {
+	//		break
+	//	}
+	//	fmt.Printf("index : %v, newIndex: %v\n", index, newIndex)
+	//	index = newIndex
+	//}
 	s.wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		fmt.Printf("action server listen on %s\n", port)

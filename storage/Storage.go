@@ -7,6 +7,13 @@ import (
 	"sync"
 )
 
+var INVALID_DELETE = errors.New("log invalid delete")
+
+var INVALID_PUT = errors.New("log invalid put")
+
+var INVALID_ACTION = errors.New("log invalid action")
+
+var NOT_FOUND = errors.New("NOT_FOUND")
 // Memory will implement Storage in memory
 type Memory struct {
 	sync.Mutex
@@ -44,7 +51,7 @@ func (m *Memory) Read(key string) (string, error) {
 		return value, nil
 	}
 	m.Unlock()
-	return "", errors.New("NOT_FOUND")
+	return "", NOT_FOUND
 }
 
 // LoadLog will LoadLog from string and do it to sync data from Primary
@@ -52,8 +59,8 @@ func (m *Memory) LoadLog(logs []string) error {
 	m.Lock()
 	defer m.Unlock()
 	/*  The log is format like this
-	Delete : D {key} {index}
-	Put: P {key} {value} {index}
+	Delete : D {key} {value} {index}
+	Put: P {key} {value} {oldValue} {index}
 	*/
 	// check whether logs is right
 	for _, log := range logs {
@@ -63,8 +70,8 @@ func (m *Memory) LoadLog(logs []string) error {
 			{
 				// Delete action
 				split := strings.Fields(log)
-				if len(split) != 3 {
-					return errors.New("log invalid delete")
+				if len(split) != 4 {
+					return INVALID_DELETE
 				}
 				_, err := strconv.ParseInt(split[len(split)-1], 10, 32)
 				if err != nil {
@@ -76,8 +83,8 @@ func (m *Memory) LoadLog(logs []string) error {
 			{
 				// Put Action
 				split := strings.Fields(log)
-				if len(split) != 4 {
-					return errors.New("log invalid put")
+				if len(split) != 5 {
+					return INVALID_PUT
 				}
 				_, err := strconv.ParseInt(split[len(split)-1], 10, 32)
 				if err != nil {
@@ -86,7 +93,7 @@ func (m *Memory) LoadLog(logs []string) error {
 			}
 		default:
 			{
-				return errors.New("log invalid action")
+				return INVALID_ACTION
 			}
 		}
 	}
