@@ -85,7 +85,7 @@ func NewLogInline(filename string) (Inline, error) {
 	f.Seek(0, io.SeekEnd)
 	return Inline{
 		filename: filename,
-		count:    0,
+		count:    *index + 1,
 		index:    index,
 		f:        f,
 	}, nil
@@ -116,6 +116,7 @@ func (log *Inline) Delete(key string, value string) error {
 	writer := bufio.NewWriter(log.f)
 	commit := "D " + key + " " + value + " " + strconv.Itoa(int(log.count)) + "\n"
 	log.count = log.count + 1
+	*log.index += 1
 	fmt.Println(commit)
 	_, err := writer.WriteString(commit)
 	if err != nil {
@@ -137,6 +138,7 @@ func (log *Inline) Put(key string, value string, oldValue string) error {
 	commit := "P " + key + " " + value + " " + oldValue + " " + strconv.Itoa(int(log.count)) + "\n"
 	fmt.Println(commit)
 	log.count = log.count + 1
+	*log.index += 1
 	_, err := writer.WriteString(commit)
 	err = writer.Flush()
 	if err != nil {
@@ -268,7 +270,7 @@ func (log *Inline) LoadLog(index int32) ([]string, int32, error) {
 		if err != nil {
 			return nil, 0, err
 		}
-		*log.index = int32(newIndex)
+		//*log.index = int32(newIndex)
 		return lines, int32(newIndex), nil
 	}
 	return lines, index, nil

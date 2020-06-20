@@ -316,13 +316,15 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 					}
 					if srv.Primary != ip+actionPort {
 						// I'm not primary start sync
-						fmt.Printf("I'm not primary start sync %s\n", ip+actionPort)
-						yurt.config.Update(srv, yconst.SECONDARY)
+						fmt.Printf("I'm not primary start sync %s\n", ip+syncPort)
 						if srv.SecondarySyncHost == yurt.config.SyncServerConfig.SyncAddr {
 							// just maybe a secondary changed or locked changed
+							yurt.config.Update(srv, yconst.SECONDARY)
 							continue
 						} else {
 							// Primary changed but not me
+							fmt.Println("326 Primary changed but not me")
+							yurt.config.Update(srv, yconst.SECONDARY)
 							syncChannel <- true
 						}
 					} else {
@@ -399,6 +401,7 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 							fmt.Println(err.Error())
 							return
 						}
+						fmt.Printf("create new syncConn from %v\n", yurt.config.SyncServerConfig.SyncAddr)
 						// create stream
 						syncClient = ysync.NewLogSyncClient(syncConn)
 						stream, err = syncClient.Sync(yurt.ctx)
@@ -419,11 +422,12 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 					//fmt.Printf("send index %v\n", index)
 					res, err := stream.Recv()
 					if err != nil {
-						fmt.Println("385")
-						fmt.Println(err.Error())
-						return
+						//fmt.Println("385")
+						//fmt.Println(err.Error())
+						continue
 					}
 					if res.Code == ysync.SyncCode_SYNC_ERROR {
+						fmt.Println("427")
 						return
 					}
 					if res.LastIndex < *index {

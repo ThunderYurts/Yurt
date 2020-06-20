@@ -117,7 +117,6 @@ func (s *Server) Sync(stream LogSync_SyncServer) error {
 				}
 
 				logs, index, err := l.LoadLog(index)
-				fmt.Printf("return log : %v, index :%v\n", logs, index)
 				// TODO can use buffer to reduce connection times
 				if err != nil {
 					// now maybe index not match
