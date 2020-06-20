@@ -19,4 +19,8 @@ const (
 	EmptyIP = ""
 	// TotalSlotNum is the num of slots
 	TotalSlotNum = 11384
+	// ActionPort is Action Server start port
+	ActionPort = ":8080"
+	// SyncPort is Sync Server start port
+	SyncPort = ":8000"
 )

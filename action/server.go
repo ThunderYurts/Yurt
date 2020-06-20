@@ -115,7 +115,7 @@ func (s *Server) Delete(ctx context.Context, in *DeleteRequest) (*DeleteReply, e
 func (s *Server) Start(port string) error {
 	actionServer := grpc.NewServer()
 	RegisterActionServer(actionServer, s)
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", yconst.ActionPort)
 	if err != nil {
 		return err
 	}

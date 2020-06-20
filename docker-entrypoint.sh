@@ -7,7 +7,7 @@ if [ "$YURT_NAME" ] ;then
   yurt_name=$YURT_NAME
 fi
 
-action_port=":40000"
+action_port=":8080"
 if [ "$ACTION_PORT" ] ;then
   action_port=$ACTION_PORT
 fi
@@ -22,7 +22,7 @@ if [ "$LOG_PATH" ] ;then
   log_path=$LOG_PATH
 fi
 
-sync_port=":39999"
+sync_port=":8000"
 if [ "$SYNC_PORT" ] ;then
   sync_port=$SYNC_PORT
 fi

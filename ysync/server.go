@@ -141,7 +141,7 @@ func (s *Server) Sync(stream LogSync_SyncServer) error {
 func (s *Server) Start(port string) error {
 	syncServer := grpc.NewServer()
 	RegisterLogSyncServer(syncServer, s)
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", yconst.SyncPort)
 	if err != nil {
 		return err
 	}

@@ -356,7 +356,8 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 				}
 			default:
 				{
-					if yurt.config.SyncServerConfig.SyncAddr != "" {
+					if yurt.config.SyncServerConfig.SyncAddr != ip + syncPort && yurt.config.SyncServerConfig.SyncAddr != "" {
+						fmt.Printf("yurt.config.SyncServerConfig.SyncAddr = %s\n", yurt.config.SyncServerConfig.SyncAddr)
 						break sync
 					}
 				}
