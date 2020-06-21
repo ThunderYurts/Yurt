@@ -1,10 +1,14 @@
 package ysync
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 	"fmt"
 	"github.com/ThunderYurts/Yurt/storage"
 	"github.com/ThunderYurts/Yurt/yconst"
+	"github.com/ThunderYurts/Yurt/zookeeper"
+	"github.com/samuel/go-zookeeper/zk"
 	"hash/crc32"
 	"io"
 	"net"
@@ -30,6 +34,8 @@ type Server struct {
 	config   *ServerConfig
 	storage  storage.Storage
 	log      log.Log
+	conn     *zk.Conn
+	serviceName string
 }
 
 // NewServer is a help function
@@ -59,10 +65,29 @@ func (s *Server) SlotSync(ctx context.Context, in *SlotRequest) (reply *SlotRepl
 			if err != nil {
 				return nil, err
 			}
-			commit := "P " + key + " " + value + " " + strconv.Itoa(count)
+			commit := "P " + key + " " + value + " " + "NOT_FOUND" + " " + strconv.Itoa(count)
 			logs = append(logs, commit)
 			count = count + 1
 		}
+	}
+	// TODO change slots
+	data, stat, err := s.conn.Get(yconst.ServiceRoot + "/"+ s.serviceName)
+	if err != nil {
+		panic(err)
+	}
+	dec := gob.NewDecoder(bytes.NewBuffer(data))
+	srv := zookeeper.ZKServiceHost{}
+	err = dec.Decode(&srv)
+	srv.SlotEnd = begin
+	buf := new(bytes.Buffer)
+	enc := gob.NewEncoder(buf)
+	err = enc.Encode(srv)
+	if err != nil {
+		panic(err)
+	}
+	_, err = s.conn.Set(yconst.ServiceRoot + "/"+ s.serviceName, buf.Bytes(), stat.Version)
+	if err != nil {
+		panic(err)
 	}
 	fmt.Printf("logs: %v\n", logs)
 	return &SlotReply{Code: SlotCode_SLOT_SUCCESS, Logs: logs}, nil
@@ -137,9 +162,11 @@ func (s *Server) Sync(stream LogSync_SyncServer) error {
 }
 
 // Start service for sync
-func (s *Server) Start(port string) error {
+func (s *Server) Start(port string, conn *zk.Conn, serviceName string) error {
+	s.serviceName = serviceName
 	syncServer := grpc.NewServer()
 	RegisterLogSyncServer(syncServer, s)
+	s.conn = conn
 	lis, err := net.Listen("tcp", yconst.SyncPort)
 	if err != nil {
 		return err

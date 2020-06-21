@@ -218,7 +218,7 @@ func (log *Inline) ImportLog(index int32, logs []string) error {
 			// TODO need rollback
 			return err
 		}
-		fmt.Printf("sedcondary write %s\n", val)
+		fmt.Printf("import log write %s\n", val)
 	}
 	err := writer.Flush()
 	*log.index = index

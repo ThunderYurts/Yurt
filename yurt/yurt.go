@@ -88,11 +88,6 @@ func (yurt *Yurt) Stop() {
 
 // Start is yurt starts service function
 func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []string) error {
-	err := yurt.syncServer.Start(syncPort)
-	if err != nil {
-		return err
-	}
-	fmt.Println("syncServer start")
 	conn, _, err := zk.Connect(zkAddr, 5*time.Second)
 	if err != nil {
 		return err
@@ -107,6 +102,11 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 	err = yurt.register.ServiceRegister(service, ip+actionPort)
 	if err != nil {
 		fmt.Println("err in 107")
+		return err
+	}
+
+	err = yurt.syncServer.Start(syncPort, conn, service)
+	if err != nil {
 		return err
 	}
 	fmt.Println("yurt service register")
@@ -200,6 +200,11 @@ func (yurt *Yurt) Start(ip string, syncPort string, actionPort string, zkAddr []
 								panic(slotReply)
 							}
 							fmt.Println(slotReply.Logs)
+							fmt.Println("write log in logs file")
+							err = yurt.log.ImportLog(int32(len(slotReply.Logs)), slotReply.Logs)
+							if err != nil {
+								panic(err)
+							}
 							err = yurt.storage.LoadLog(slotReply.Logs)
 							if err != nil {
 								panic(err)
