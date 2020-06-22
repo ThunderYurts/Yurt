@@ -39,12 +39,12 @@ func main() {
 	}
 	rootContext, finalizeFunc := context.WithCancel(context.Background())
 
-	yurt, err := yurt.NewYurt(rootContext, finalizeFunc, name, logName)
+	y, err := yurt.NewYurt(rootContext, finalizeFunc, name, logName)
 	if err != nil {
-		fmt.Println(err.Error())
+		panic(err)
 	}
 	addrs := strings.Split(zkAddr, ";")
-	err = yurt.Start(ip, syncPort, actionPort, addrs)
+	err = y.Start(ip, syncPort, actionPort, addrs)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -54,5 +54,5 @@ func main() {
 	s := <-c
 
 	fmt.Println("Got signal:", s)
-	yurt.Stop()
+	y.Stop()
 }
